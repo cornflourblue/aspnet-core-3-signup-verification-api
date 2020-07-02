@@ -27,6 +27,7 @@ namespace WebApi
             services.AddCors();
             services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddSwaggerGen();
 
             // configure strongly typed settings object
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -41,6 +42,10 @@ namespace WebApi
         {
             // migrate database changes on startup (includes initial db creation)
             context.Database.Migrate();
+
+            // generated swagger json and swagger ui middleware
+            app.UseSwagger();
+            app.UseSwaggerUI(x => x.SwaggerEndpoint("/swagger/v1/swagger.json", "ASP.NET Core Sign-up and Verification API"));
 
             app.UseRouting();
 

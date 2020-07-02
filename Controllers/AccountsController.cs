@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using WebApi.Entities;
 using WebApi.Models.Accounts;
 using WebApi.Services;
@@ -24,7 +25,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost("authenticate")]
-        public IActionResult Authenticate(AuthenticateRequest model)
+        public ActionResult<AuthenticateResponse> Authenticate(AuthenticateRequest model)
         {
             var response = _accountService.Authenticate(model, ipAddress());
             setTokenCookie(response.RefreshToken);
@@ -32,7 +33,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost("refresh-token")]
-        public IActionResult RefreshToken()
+        public ActionResult<AuthenticateResponse> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
             var response = _accountService.RefreshToken(refreshToken, ipAddress());
@@ -95,7 +96,7 @@ namespace WebApi.Controllers
 
         [Authorize(Role.Admin)]
         [HttpGet]
-        public IActionResult GetAll()
+        public ActionResult<IEnumerable<AccountResponse>> GetAll()
         {
             var accounts = _accountService.GetAll();
             return Ok(accounts);
@@ -103,7 +104,7 @@ namespace WebApi.Controllers
 
         [Authorize]
         [HttpGet("{id:int}")]
-        public IActionResult GetById(int id)
+        public ActionResult<AccountResponse> GetById(int id)
         {
             // users can get their own account and admins can get any account
             if (id != Account.Id && Account.Role != Role.Admin)
@@ -115,7 +116,7 @@ namespace WebApi.Controllers
 
         [Authorize(Role.Admin)]
         [HttpPost]
-        public IActionResult Create(CreateRequest model)
+        public ActionResult<AccountResponse> Create(CreateRequest model)
         {
             var account = _accountService.Create(model);
             return Ok(account);
@@ -123,7 +124,7 @@ namespace WebApi.Controllers
 
         [Authorize]
         [HttpPut("{id:int}")]
-        public IActionResult Update(int id, UpdateRequest model)
+        public ActionResult<AccountResponse> Update(int id, UpdateRequest model)
         {
             // users can update their own account and admins can update any account
             if (id != Account.Id && Account.Role != Role.Admin)
