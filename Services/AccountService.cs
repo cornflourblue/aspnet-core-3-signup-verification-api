@@ -77,21 +77,25 @@ namespace WebApi.Services
         {
             var (refreshToken, account) = getRefreshToken(token);
 
+            var responseToken = refreshToken.Token;
             // replace old refresh token with a new one and save
-            var newRefreshToken = generateRefreshToken(ipAddress);
-            refreshToken.Revoked = DateTime.UtcNow;
-            refreshToken.RevokedByIp = ipAddress;
-            refreshToken.ReplacedByToken = newRefreshToken.Token;
-            account.RefreshTokens.Add(newRefreshToken);
-            _context.Update(account);
-            _context.SaveChanges();
+            if (!refreshToken.IsActive) {
+                var newRefreshToken = generateRefreshToken(ipAddress);
+                refreshToken.Revoked = DateTime.UtcNow;
+                refreshToken.RevokedByIp = ipAddress;
+                refreshToken.ReplacedByToken = newRefreshToken.Token;
+                account.RefreshTokens.Add(newRefreshToken);
+                _context.Update(account);
+                _context.SaveChanges();
+                responseToken = newRefreshToken.Token;
+            }
 
             // generate new jwt
             var jwtToken = generateJwtToken(account);
 
             var response = _mapper.Map<AuthenticateResponse>(account);
             response.JwtToken = jwtToken;
-            response.RefreshToken = newRefreshToken.Token;
+            response.RefreshToken = responseToken;
             return response;
         }
 
