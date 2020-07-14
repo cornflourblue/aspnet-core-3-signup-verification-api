@@ -240,7 +240,7 @@ namespace WebApi.Services
             var account = getAccount(id);
 
             // validate
-            if (_context.Accounts.Any(x => x.Email == model.Email))
+            if (account.Email != model.Email && _context.Accounts.Any(x => x.Email == model.Email))
                 throw new AppException($"Email '{model.Email}' is already taken");
 
             // hash password if it was entered
