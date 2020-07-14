@@ -371,7 +371,7 @@ namespace WebApi.Services
                 to: email,
                 subject: "Sign-up Verification API - Email Already Registered",
                 html: $@"<h4>Email Already Registered</h4>
-                         <p>Your email <strong>${email}</strong> is already registered.</p>
+                         <p>Your email <strong>{email}</strong> is already registered.</p>
                          {message}"
             );
         }
@@ -381,7 +381,7 @@ namespace WebApi.Services
             string message;
             if (!string.IsNullOrEmpty(origin))
             {
-                var resetUrl = $"{origin}/account/reset-password?token=${account.ResetToken}";
+                var resetUrl = $"{origin}/account/reset-password?token={account.ResetToken}";
                 message = $@"<p>Please click the below link to reset your password, the link will be valid for 1 day:</p>
                              <p><a href=""{resetUrl}"">{resetUrl}</a></p>";
             }
