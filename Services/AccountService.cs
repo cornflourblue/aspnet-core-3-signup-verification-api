@@ -1,4 +1,5 @@
 using AutoMapper;
+using BC = BCrypt.Net.BCrypt;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -55,7 +56,7 @@ namespace WebApi.Services
             var account = _context.Accounts.SingleOrDefault(x => x.Email == model.Email);
 
             // return null if account not found
-            if (account == null || !account.IsVerified || !verifyPassword(model.Password, account))
+            if (account == null || !account.IsVerified || !BC.Verify(model.Password, account.PasswordHash))
                 throw new AppException("Email or password is incorrect");
 
             // authentication successful so generate jwt and refresh tokens
@@ -126,9 +127,7 @@ namespace WebApi.Services
             account.VerificationToken = randomTokenString();
 
             // hash password
-            var (passwordHash, passwordSalt) = hashPassword(model.Password);
-            account.PasswordHash = passwordHash;
-            account.PasswordSalt = passwordSalt;
+            account.PasswordHash = BC.HashPassword(model.Password);
 
             // save account
             _context.Accounts.Add(account);
@@ -189,9 +188,7 @@ namespace WebApi.Services
                 throw new AppException("Invalid token");
 
             // update password and remove reset token
-            var (passwordHash, passwordSalt) = hashPassword(model.Password);
-            account.PasswordHash = passwordHash;
-            account.PasswordSalt = passwordSalt;
+            account.PasswordHash = BC.HashPassword(model.Password);
             account.PasswordReset = DateTime.UtcNow;
             account.ResetToken = null;
             account.ResetTokenExpires = null;
@@ -224,9 +221,7 @@ namespace WebApi.Services
             account.Verified = DateTime.UtcNow;
 
             // hash password
-            var (passwordHash, passwordSalt) = hashPassword(model.Password);
-            account.PasswordHash = passwordHash;
-            account.PasswordSalt = passwordSalt;
+            account.PasswordHash = BC.HashPassword(model.Password);
 
             // save account
             _context.Accounts.Add(account);
@@ -245,12 +240,7 @@ namespace WebApi.Services
 
             // hash password if it was entered
             if (!string.IsNullOrEmpty(model.Password))
-            {
-                // hash password
-                var (passwordHash, passwordSalt) = hashPassword(model.Password);
-                account.PasswordHash = passwordHash;
-                account.PasswordSalt = passwordSalt;
-            }
+                account.PasswordHash = BC.HashPassword(model.Password);
 
             // copy model to account and save
             _mapper.Map(model, account);
@@ -318,21 +308,6 @@ namespace WebApi.Services
             rngCryptoServiceProvider.GetBytes(randomBytes);
             // convert random bytes to hex string
             return BitConverter.ToString(randomBytes).Replace("-", "");
-        }
-
-        private (byte[], byte[]) hashPassword(string password)
-        {
-            using var hmac = new HMACSHA512();
-            var passwordSalt = hmac.Key;
-            var passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return (passwordHash, passwordSalt);
-        }
-
-        private bool verifyPassword(string password, Account account)
-        {
-            using var hmac = new HMACSHA512(account.PasswordSalt);
-            var passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return passwordHash.SequenceEqual(account.PasswordHash);
         }
 
         private void sendVerificationEmail(Account account, string origin)
