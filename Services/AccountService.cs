@@ -320,7 +320,7 @@ namespace WebApi.Services
             }
             else
             {
-                message = $@"<p>Please use the below token to verify your email address with the <code>/account/verify-email</code> api route:</p>
+                message = $@"<p>Please use the below token to verify your email address with the <code>/accounts/verify-email</code> api route:</p>
                              <p><code>{account.VerificationToken}</code></p>";
             }
 
@@ -339,7 +339,7 @@ namespace WebApi.Services
             if (!string.IsNullOrEmpty(origin))
                 message = $@"<p>If you don't know your password please visit the <a href=""{origin}/account/forgot-password"">forgot password</a> page.</p>";
             else
-                message = "<p>If you don't know your password you can reset it via the <code>/account/forgot-password</code> api route.</p>";
+                message = "<p>If you don't know your password you can reset it via the <code>/accounts/forgot-password</code> api route.</p>";
 
             _emailService.Send(
                 to: email,
@@ -361,7 +361,7 @@ namespace WebApi.Services
             }
             else
             {
-                message = $@"<p>Please use the below token to reset your password with the <code>/account/reset-password</code> api route:</p>
+                message = $@"<p>Please use the below token to reset your password with the <code>/accounts/reset-password</code> api route:</p>
                              <p><code>{account.ResetToken}</code></p>";
             }
 
