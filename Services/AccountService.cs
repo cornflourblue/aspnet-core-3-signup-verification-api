@@ -60,7 +60,17 @@ namespace WebApi.Services
 
             // authentication successful so generate jwt and refresh tokens
             var jwtToken = generateJwtToken(account);
-            var refreshToken = generateRefreshToken(ipAddress);
+            RefreshToken refreshToken;
+            // check if there is an active refresh token already and use that instead of generating a new one
+            RefreshToken activeRefreshToken = account.RefreshTokens.SingleOrDefault(r => r.IsActive && r.Expires >= DateTime.UtcNow);
+            if (activeRefreshToken != null && activeRefreshToken.IsActive)
+            {
+                refreshToken = activeRefreshToken;
+            }
+            else
+            {
+                refreshToken = generateRefreshToken(ipAddress);
+            }
 
             // save refresh token
             account.RefreshTokens.Add(refreshToken);
