@@ -29,6 +29,7 @@ namespace WebApi.Services
             email.To.Add(MailboxAddress.Parse(to));
             email.Subject = subject;
             email.Body = new TextPart(TextFormat.Html) { Text = html };
+            email.From.Add(new MailboxAddress("Displayed name", from ?? _appSettings.EmailFrom));
 
             // send email
             using var smtp = new SmtpClient();
