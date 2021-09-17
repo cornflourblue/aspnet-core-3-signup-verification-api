@@ -25,7 +25,7 @@ namespace WebApi.Services
         {
             // create message
             var email = new MimeMessage();
-            email.Sender = MailboxAddress.Parse(from ?? _appSettings.EmailFrom);
+            email.From.Add(MailboxAddress.Parse(from ?? _appSettings.EmailFrom));
             email.To.Add(MailboxAddress.Parse(to));
             email.Subject = subject;
             email.Body = new TextPart(TextFormat.Html) { Text = html };
